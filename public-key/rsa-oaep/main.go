@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha512"
 	"fmt"
 	"math/big"
 )
@@ -20,7 +21,7 @@ func main() {
 	// E is 64437 https://en.wikipedia.org/wiki/65537_(number))
 
 	// size of key (bits)
-	size := 1024
+	size := 2048
 
 	// nprimes is the number of prime of which N consists
 	// e.g., if nprimes is 2, N = p*q. If nprimes is 3, N = p*q*r
@@ -38,4 +39,27 @@ func main() {
 		panic("shoud not reach here")
 	}
 
+	plain := []byte("Bob loves Alice.")
+
+	// A label is a byte string that is effectively bound to the ciphertext in a nonmalleable way.
+	// http://crypto.stackexchange.com/questions/2074/rsa-oaep-input-parameters
+	label := []byte("test")
+
+	// Get public key from private key and encrypt
+	publicKey := &privateKey.PublicKey
+	cipherText, err := rsa.EncryptOAEP(sha512.New(), rand.Reader, publicKey, plain, label)
+	if err != nil {
+		fmt.Printf("Err: %s\n", err)
+		return
+	}
+	fmt.Printf("Cipher: %x\n", cipherText)
+
+	// Decrypt with private key
+	plainText, err := rsa.DecryptOAEP(sha512.New(), rand.Reader, privateKey, cipherText, label)
+	if err != nil {
+		fmt.Printf("Err: %s\n", err)
+		return
+	}
+
+	fmt.Printf("Plain: %s\n", plainText)
 }
