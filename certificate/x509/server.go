@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/big"
+	"net"
 	"os"
 	"time"
 )
@@ -60,6 +61,8 @@ func main() {
 
 		NotBefore: time.Now(),
 		NotAfter:  time.Now().Add(24 * time.Hour),
+
+		IPAddresses: []net.IP{net.ParseIP("127.0.0.1")},
 
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
