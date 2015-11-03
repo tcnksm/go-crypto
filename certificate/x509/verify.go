@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-
-	rootPem, err := ioutil.ReadFile("cert/ca.pem")
+	// Read CA certificate
+	rootPem, err := ioutil.ReadFile("certs/ca.pem")
 	if err != nil {
 		fmt.Printf("Err: %s\n", err)
 		return
@@ -22,7 +22,7 @@ func main() {
 		return
 	}
 
-	serverPem, err := ioutil.ReadFile("cert/server.pem")
+	serverPem, err := ioutil.ReadFile("certs/server.pem")
 	if err != nil {
 		fmt.Printf("Err: %s\n", err)
 		return
@@ -39,12 +39,11 @@ func main() {
 		Roots: roots,
 	}
 
-	chain, err := serverCert.Verify(opts)
-	if err != nil {
+	// Server cert is signed by ca private key.
+	// Now we can check its sign by ca certs (public key).
+	if _, err := serverCert.Verify(opts); err != nil {
 		fmt.Printf("Err: %s\n", err)
 		return
 	}
-
-	fmt.Printf("%#v\n", chain[0][0].Subject.Organization)
-	fmt.Printf("%#v\n", chain[0][1].Subject.Organization)
+	fmt.Printf("Valified!\n")
 }

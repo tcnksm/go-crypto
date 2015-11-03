@@ -16,19 +16,45 @@ import (
 // Generate server cert (server.pem) signed by ca.pem
 // and private key (serverkey.pem)
 func main() {
+	// Read CA certificate pem file
+	caPem, err := ioutil.ReadFile("certs/ca.pem")
+	if err != nil {
+		fmt.Printf("Err: %s\n", err)
+		return
+	}
+	caBlock, _ := pem.Decode(caPem)
+	caCert, err := x509.ParseCertificate(caBlock.Bytes)
+	if err != nil {
+		fmt.Printf("Err: %s\n", err)
+		return
+	}
 
-	// Generate pub & priv key pair by RSA
+	// Read CA private key pem file
+	caKeyPem, err := ioutil.ReadFile("certs/ca-key.pem")
+	if err != nil {
+		fmt.Printf("Err: %s\n", err)
+		return
+	}
+	caKeyBlock, _ := pem.Decode(caKeyPem)
+	caPriv, err := x509.ParsePKCS1PrivateKey(caKeyBlock.Bytes)
+	if err != nil {
+		fmt.Printf("Err: %s\n", err)
+		return
+	}
+
+	// Generate pub & priv key pair for server certs by RSA
 	size := 2024
 	priv, err := rsa.GenerateKey(rand.Reader, size)
 	if err != nil {
-		fmt.Printf("Err: %s", err)
+		fmt.Printf("Err: %s\n", err)
 		return
 	}
 
 	// Create CA certificate template
-	tmpl := x509.Certificate{
+	cert := x509.Certificate{
 		SerialNumber: big.NewInt(12345),
 		Subject: pkix.Name{
+			Country:      []string{"Japan"},
 			Organization: []string{"TCNKSM WEB Inc."},
 		},
 
@@ -40,37 +66,16 @@ func main() {
 		BasicConstraintsValid: true,
 	}
 
-	rootPem, err := ioutil.ReadFile("cert/ca.pem")
+	// Create Server Certificate. Sign by CA private key.
+	derBytes, err := x509.CreateCertificate(rand.Reader, &cert, caCert, &priv.PublicKey, caPriv)
 	if err != nil {
 		fmt.Printf("Err: %s\n", err)
 		return
 	}
 
-	rootBlock, _ := pem.Decode(rootPem)
-	rootCert, err := x509.ParseCertificate(rootBlock.Bytes)
+	certOut, err := os.Create("certs/server.pem")
 	if err != nil {
 		fmt.Printf("Err: %s\n", err)
-		return
-	}
-
-	rootKeyPem, err := ioutil.ReadFile("cert/cakey.pem")
-	if err != nil {
-		fmt.Printf("Err: %s\n", err)
-		return
-	}
-	rootKeyBlock, _ := pem.Decode(rootKeyPem)
-	rootPriv, err := x509.ParsePKCS1PrivateKey(rootKeyBlock.Bytes)
-
-	// Create Certificate
-	derBytes, err := x509.CreateCertificate(rand.Reader, &tmpl, rootCert, &priv.PublicKey, rootPriv)
-	if err != nil {
-		fmt.Printf("Err: %s\n", err)
-		return
-	}
-
-	certOut, err := os.Create("cert/server.pem")
-	if err != nil {
-		fmt.Printf("Err: %s", err)
 		return
 	}
 	defer certOut.Close()
@@ -79,13 +84,13 @@ func main() {
 		Type:  "CERTIFICATE",
 		Bytes: derBytes,
 	}); err != nil {
-		fmt.Printf("Err: %s", err)
+		fmt.Printf("Err: %s\n", err)
 		return
 	}
 
-	keyOut, err := os.Create("cert/serverkey.pem")
+	keyOut, err := os.OpenFile("certs/server-key.pem", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		fmt.Printf("Err: %s", err)
+		fmt.Printf("Err: %s\n", err)
 		return
 	}
 	defer keyOut.Close()
@@ -94,7 +99,7 @@ func main() {
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(priv),
 	}); err != nil {
-		fmt.Printf("Err: %s", err)
+		fmt.Printf("Err: %s\n", err)
 		return
 	}
 }

@@ -12,21 +12,22 @@ import (
 	"time"
 )
 
-// Generate self-signed certificate Root CA cert (ca.pem) and its key
+// Generate self-signed certificate Root CA cert (ca.pem) and its key (ca-key.pem)
 func main() {
 	// Generate pub & priv key pair by RSA
 	size := 2024
 	priv, err := rsa.GenerateKey(rand.Reader, size)
 	if err != nil {
-		fmt.Printf("Err: %s", err)
+		fmt.Printf("Err: %s\n", err)
 		return
 	}
 
 	// Create CA certificate template
-	tmpl := x509.Certificate{
+	ca := x509.Certificate{
 		IsCA:         true,
 		SerialNumber: big.NewInt(1234),
 		Subject: pkix.Name{
+			Country:      []string{"Japan"},
 			Organization: []string{"TCNKSM CA Inc."},
 		},
 
@@ -39,15 +40,15 @@ func main() {
 	}
 
 	// Create Certificate
-	derBytes, err := x509.CreateCertificate(rand.Reader, &tmpl, &tmpl, &priv.PublicKey, priv)
+	derBytes, err := x509.CreateCertificate(rand.Reader, &ca, &ca, &priv.PublicKey, priv)
 	if err != nil {
 		fmt.Printf("Err: %s\n", err)
 		return
 	}
 
-	certOut, err := os.Create("cert/ca.pem")
+	certOut, err := os.Create("certs/ca.pem")
 	if err != nil {
-		fmt.Printf("Err: %s", err)
+		fmt.Printf("Err: %s\n", err)
 		return
 	}
 	defer certOut.Close()
@@ -56,13 +57,13 @@ func main() {
 		Type:  "CERTIFICATE",
 		Bytes: derBytes,
 	}); err != nil {
-		fmt.Printf("Err: %s", err)
+		fmt.Printf("Err: %s\n", err)
 		return
 	}
 
-	keyOut, err := os.OpenFile("cert/cakey.pem", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	keyOut, err := os.OpenFile("certs/ca-key.pem", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		fmt.Printf("Err: %s", err)
+		fmt.Printf("Err: %s\n", err)
 		return
 	}
 	defer keyOut.Close()
@@ -71,7 +72,7 @@ func main() {
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(priv),
 	}); err != nil {
-		fmt.Printf("Err: %s", err)
+		fmt.Printf("Err: %s\n", err)
 		return
 	}
 }
