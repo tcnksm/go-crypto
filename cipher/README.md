@@ -21,4 +21,4 @@
 
 Authenticated encryption with associated data.
 
-**GCM** (Galois/Counter): *CTR*が暗号文を作り出すと同時に「この暗号文は正しい暗号化によって作られたものである」とう認証子を作り出す．暗号文の偽装を見抜くことができる．TLS1.2で使われる．IVが必要ない
+- **GCM** (Galois/Counter): *CTR*が暗号文を作り出すと同時に「この暗号文は正しい暗号化によって作られたものである」とう認証子を作り出す．暗号文の偽装を見抜くことができる．TLS1.2で使われる．IVが必要ない
