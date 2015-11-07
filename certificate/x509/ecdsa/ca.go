@@ -28,7 +28,7 @@ func main() {
 		SerialNumber: big.NewInt(1234),
 		Subject: pkix.Name{
 			Country:      []string{"Japan"},
-			Organization: []string{"TCNKSM CA Inc."},
+			Organization: []string{"TCNKSM ECDSA CA Inc."},
 		},
 
 		NotBefore: time.Now(),
