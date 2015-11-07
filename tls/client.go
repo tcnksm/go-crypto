@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// Read CA certificate
-	caFile, _ := filepath.Abs("../certificate/x509/certs/ca.pem")
+	caFile, _ := filepath.Abs("../certificate/x509/ecdsa/certs/ca.pem")
 	rootPem, err := ioutil.ReadFile(caFile)
 	if err != nil {
 		fmt.Printf("Err: %s\n", err)

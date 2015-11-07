@@ -10,8 +10,8 @@ import (
 )
 
 func main() {
-	certFile, _ := filepath.Abs("../certificate/x509/certs/server.pem")
-	keyFile, _ := filepath.Abs("../certificate/x509/certs/server-key.pem")
+	certFile, _ := filepath.Abs("../certificate/x509/ecdsa/certs/server.pem")
+	keyFile, _ := filepath.Abs("../certificate/x509/ecdsa/certs/server-key.pem")
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
 		log.Printf("Err: %s\n", err)
