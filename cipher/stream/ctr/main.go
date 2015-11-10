@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	plainText := []byte("Bob loves Alice.")
+	plainText := []byte("Bob loves Alice. But Alice hate Bob...")
 	key := []byte("passw0rdpassw0rdpassw0rdpassw0rd")
 
 	// Create new AES cipher block
@@ -31,7 +31,7 @@ func main() {
 	// Encrypt
 	encryptStream := cipher.NewCTR(block, iv)
 	encryptStream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
-	fmt.Printf("Cipher text: %v \n", cipherText)
+	fmt.Printf("Cipher text: %x \n", cipherText)
 
 	// Decrpt
 	decryptedText := make([]byte, len(cipherText[aes.BlockSize:]))

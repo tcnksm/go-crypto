@@ -27,7 +27,7 @@ func main() {
 	// e.g., if nprimes is 2, N = p*q. If nprimes is 3, N = p*q*r
 	nprimes := 2
 
-	privateKey, err := rsa.GenerateMultiPrimeKey(rand.Reader, nprimes, size)
+	privateKey, err := rsa.GenerateKey(rand.Reader, size)
 	if err != nil {
 		fmt.Printf("err: %s", err)
 		return
